@@ -1,0 +1,5 @@
+OCR_AKA_IMAGES
+venv
+.vscode
+__pycache__
+src
