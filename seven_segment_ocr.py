@@ -15,18 +15,16 @@ def visulize(image, thresholded):
     plt.show()
 
 
-def get_segments_from_image(image_path) -> list[int]:
-    image = cv2.imread(image_path)
-
-    # Preprocessing
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, thresholded = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV)
-
-    # visulize(image, thresholded)
-
-    # Segment dimensions and positions. make it dynamic latter
+def get_segments_from_image(image: NDArray) -> list[int]:
+    """
+    Need to make it dynamic so If I got diff digit size, I would still be able to predict
+    :param image:
+    :return: The seven segments
+    """
     segment_width = 10
     segment_height = 10
+
+    # TODO: Need to make it dynamic according to image size
     positions: list[tuple[int, int]] = [
         (0, 15),
         (15, 0),
@@ -40,12 +38,12 @@ def get_segments_from_image(image_path) -> list[int]:
     segments = []
     for position in positions:
         h_start, w_start = position
-        segment: NDArray = thresholded[
+        segment: NDArray = image[
             h_start : h_start + segment_height, w_start : w_start + segment_width
         ]
         segment_mean = np.mean(segment)
-        segment_containts_black_pixels = segment_mean > 150
-        segments.append(1) if segment_containts_black_pixels else segments.append(0)
+        segment_contains_black_pixels = segment_mean > 150
+        segments.append(1) if segment_contains_black_pixels else segments.append(0)
 
     return segments
 
@@ -77,7 +75,6 @@ segments = get_segments_from_image(image_path)
 print(segments)
 digit = identify_digit(segments)
 print("digit:", digit)
-
 
 print(f"segmenting number 5 _-----------------------------------")
 image_path = "5.jpg"
