@@ -21,9 +21,14 @@ def get_segments_from_image(image: NDArray) -> list[int]:
     :param image:
     :return: The seven segments
     """
-    segment_width = 10
-    segment_height = 10
+    segment_width = 12
+    segment_height = 12
 
+    image = cv2.resize(image, (71, 41))
+    image = cv2.rotate(image, rotateCode=cv2.ROTATE_90_COUNTERCLOCKWISE)
+    plt.imshow(image, cmap="gray")
+    plt.title("image")
+    plt.show()
     # TODO: Need to make it dynamic according to image size
     positions: list[tuple[int, int]] = [
         (0, 15),
@@ -41,8 +46,8 @@ def get_segments_from_image(image: NDArray) -> list[int]:
         segment: NDArray = image[
             h_start : h_start + segment_height, w_start : w_start + segment_width
         ]
-        segment_mean = np.mean(segment)
-        segment_contains_black_pixels = segment_mean > 150
+        segment_average = np.average(segment)
+        segment_contains_black_pixels = segment_average < 170
         segments.append(1) if segment_contains_black_pixels else segments.append(0)
 
     return segments
@@ -69,16 +74,16 @@ def identify_digit(segments):
     return None
 
 
-print(f"segmenting number 2 _-----------------------------------")
-image_path = "2.jpg"
-segments = get_segments_from_image(image_path)
-print(segments)
-digit = identify_digit(segments)
-print("digit:", digit)
-
-print(f"segmenting number 5 _-----------------------------------")
-image_path = "5.jpg"
-segments = get_segments_from_image(image_path)
-print(segments)
-digit = identify_digit(segments)
-print("digit:", digit)
+# print(f"segmenting number 2 _-----------------------------------")
+# image_path = "2.jpg"
+# segments = get_segments_from_image(image_path)
+# print(segments)
+# digit = identify_digit(segments)
+# print("digit:", digit)
+#
+# print(f"segmenting number 5 _-----------------------------------")
+# image_path = "5.jpg"
+# segments = get_segments_from_image(image_path)
+# print(segments)
+# digit = identify_digit(segments)
+# print("digit:", digit)

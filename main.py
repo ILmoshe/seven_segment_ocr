@@ -53,39 +53,33 @@ def get_temp(img: NDArray) -> DigitsValue:
 
     predicted_left_digit = predict(left_digit)
     predicted_right_digit = predict(right_digit)
-
-    plt.imshow(left_digit, cmap="gray")
-    plt.title("left_digit")
-    plt.show()
-    plt.imshow(right_digit, cmap="gray")
-    plt.title("right_digit")
-    plt.show()
+    print(f"Predicted {predicted_left_digit}{predicted_right_digit}")
 
     return DigitsValue(
         left_digit=predicted_left_digit, right_digit=predicted_right_digit
     )
 
 
-def get_humidity(img: NDArray) -> DigitsValue:
-    """
-    Gets the actual value of the temperature digits:
-    Actual length came kind of diff, but it doesn't really matter.
-    Left digit: 57. Right digit: 55.
-    :param img: Image which are cropped to the temperature digits.
-    :return: The actual two digit value
-    """
-    left_up_left_digit = Coordinates(x=0, y=0)
-    right_bottom_left_digit = Coordinates(x=96, y=58)
-    left_digit = crop(img, left_up_left_digit, right_bottom_left_digit)
-    left_up_right_digit = Coordinates(x=1, y=70)
-    right_bottom_right_digit = Coordinates(x=96, y=126)
-    right_digit = crop(img, left_up_right_digit, right_bottom_right_digit)
-    plt.imshow(left_digit, cmap="gray")
-    plt.title("left_digit")
-    plt.show()
-    plt.imshow(right_digit, cmap="gray")
-    plt.title("right_digit")
-    plt.show()
+# def get_humidity(img: NDArray) -> DigitsValue:
+#     """
+#     Gets the actual value of the temperature digits:
+#     Actual length came kind of diff, but it doesn't really matter.
+#     Left digit: 57. Right digit: 55.
+#     :param img: Image which are cropped to the temperature digits.
+#     :return: The actual two digit value
+#     """
+#     left_up_left_digit = Coordinates(x=0, y=0)
+#     right_bottom_left_digit = Coordinates(x=96, y=58)
+#     left_digit = crop(img, left_up_left_digit, right_bottom_left_digit)
+#     left_up_right_digit = Coordinates(x=1, y=70)
+#     right_bottom_right_digit = Coordinates(x=96, y=126)
+#     right_digit = crop(img, left_up_right_digit, right_bottom_right_digit)
+#     plt.imshow(left_digit, cmap="gray")
+#     plt.title("left_digit")
+#     plt.show()
+#     plt.imshow(right_digit, cmap="gray")
+#     plt.title("right_digit")
+#     plt.show()
 
 
 def get_digit():
