@@ -1,4 +1,6 @@
 from collections import namedtuple
+from dataclasses import dataclass
+from typing import TypedDict
 
 import cv2
 import numpy as np
@@ -12,6 +14,17 @@ Coordinates = namedtuple("Coordinates", ["x", "y"])
 DigitsValue = namedtuple("DigitValue", ["left_digit", "right_digit"])
 
 
+class DigitCoordinates(TypedDict):
+    left_up: Coordinates
+    right_down: Coordinates
+
+
+@dataclass
+class TwoDigitCoordinate:
+    left_digit: DigitCoordinates
+    right_digit: DigitCoordinates
+
+
 def get_center(img: NDArray) -> NDArray:
     """
     Gets the center of ths screen
@@ -19,37 +32,46 @@ def get_center(img: NDArray) -> NDArray:
     :return: Cropped Image
     """
     # first crop get humidity and temp
-    left_up = Coordinates(x=486, y=190)
-    right_bottom = Coordinates(x=586, y=585)
-    humidity_temp = crop(img, left_up, right_bottom)
+    coord = DigitCoordinates(
+        left_up=Coordinates(x=486, y=190), right_down=Coordinates(x=586, y=585)
+    )
+    humidity_and_temp = crop(img, coord)
 
-    filtered = apply_filters(humidity_temp)
+    filtered = apply_filters(humidity_and_temp)
     plt.imshow(filtered, cmap="gray")
     plt.title("cropped & filtered Image")
     plt.show()
     return filtered
 
 
-def crop(img: NDArray, left_up: Coordinates, right_bottom: Coordinates) -> NDArray:
-    cropped_img = img[left_up.y : right_bottom.y, left_up.x : right_bottom.x]
+def get_wind(img: NDArray) -> DigitsValue:
+    pass
+
+
+def crop(img: NDArray, digit: DigitCoordinates) -> NDArray:
+    cropped_img = img[
+        digit["left_up"].y : digit["right_down"].y,
+        digit["left_up"].x : digit["right_down"].x,
+    ]
     return cropped_img
 
 
-def get_temp(img: NDArray) -> DigitsValue:
+def process_two_digits(img: NDArray, digit: TwoDigitCoordinate) -> DigitsValue:
     """
-    Gets the actual value of the temperature digits:
-    Actual length came kind of diff, but it doesn't really matter.
-    Left digit: 57. Right digit: 55. It can cause a problem
     :param img: Image which are cropped to the temperature digits.
+    :param digit:
     :return: The actual two digit value
     """
-    left_up_left_digit = Coordinates(x=0, y=0)
-    right_bottom_left_digit = Coordinates(x=96, y=58)
-    left_digit = crop(img, left_up_left_digit, right_bottom_left_digit)
 
-    left_up_right_digit = Coordinates(x=1, y=70)
-    right_bottom_right_digit = Coordinates(x=96, y=126)
-    right_digit = crop(img, left_up_right_digit, right_bottom_right_digit)
+    left_digit_to_crop = DigitCoordinates(
+        left_up=digit.left_digit["left_up"], right_down=digit.left_digit["right_down"]
+    )
+    left_digit = crop(img, left_digit_to_crop)
+
+    right_digit_to_crop = DigitCoordinates(
+        left_up=digit.right_digit["left_up"], right_down=digit.right_digit["right_down"]
+    )
+    right_digit = crop(img, right_digit_to_crop)
 
     predicted_left_digit = predict(left_digit)
     predicted_right_digit = predict(right_digit)
@@ -60,30 +82,40 @@ def get_temp(img: NDArray) -> DigitsValue:
     )
 
 
-# def get_humidity(img: NDArray) -> DigitsValue:
-#     """
-#     Gets the actual value of the temperature digits:
-#     Actual length came kind of diff, but it doesn't really matter.
-#     Left digit: 57. Right digit: 55.
-#     :param img: Image which are cropped to the temperature digits.
-#     :return: The actual two digit value
-#     """
-#     left_up_left_digit = Coordinates(x=0, y=0)
-#     right_bottom_left_digit = Coordinates(x=96, y=58)
-#     left_digit = crop(img, left_up_left_digit, right_bottom_left_digit)
-#     left_up_right_digit = Coordinates(x=1, y=70)
-#     right_bottom_right_digit = Coordinates(x=96, y=126)
-#     right_digit = crop(img, left_up_right_digit, right_bottom_right_digit)
-#     plt.imshow(left_digit, cmap="gray")
-#     plt.title("left_digit")
-#     plt.show()
-#     plt.imshow(right_digit, cmap="gray")
-#     plt.title("right_digit")
-#     plt.show()
+def get_temp(img: NDArray) -> DigitsValue:
+    """
+    :param img: Image which are cropped to the temperature digits.
+    :return: The actual two digit value
+    """
+    left = DigitCoordinates(
+        left_up=Coordinates(x=0, y=0), right_down=Coordinates(x=96, y=58)
+    )
+    right = DigitCoordinates(
+        left_up=Coordinates(x=1, y=70), right_down=Coordinates(x=96, y=126)
+    )
+    digits_coord = TwoDigitCoordinate(left_digit=left, right_digit=right)
+    return process_two_digits(img, digits_coord)
 
 
-def get_digit():
-    pass
+def get_humidity(img: NDArray) -> DigitsValue:
+    """
+    :param img: Image which are cropped to the temperature digits.
+    :return: The actual two digit value
+    """
+
+    first_crop = DigitCoordinates(
+        left_up=Coordinates(x=1, y=278), right_down=Coordinates(x=97, y=394)
+    )
+    img = crop(img, first_crop)
+
+    left = DigitCoordinates(
+        left_up=Coordinates(x=0, y=0), right_down=Coordinates(x=96, y=54)
+    )
+    right = DigitCoordinates(
+        left_up=Coordinates(x=1, y=70), right_down=Coordinates(x=96, y=126)
+    )
+    digits_coord = TwoDigitCoordinate(left_digit=left, right_digit=right)
+    return process_two_digits(img, digits_coord)
 
 
 def predict(img: NDArray) -> int:
@@ -94,4 +126,8 @@ def predict(img: NDArray) -> int:
 
 image = cv2.imread("fullview.jpg")
 cropped = get_center(image)
-get_temp(cropped)
+temperature = get_temp(cropped)
+humidity = get_humidity(cropped)
+print(
+    f"temperature {temperature.left_digit}{temperature.right_digit}. humidity {humidity.left_digit}{humidity.right_digit}"
+)

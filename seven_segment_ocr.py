@@ -29,7 +29,7 @@ def get_segments_from_image(image: NDArray) -> list[int]:
     plt.imshow(image, cmap="gray")
     plt.title("image")
     plt.show()
-    # TODO: Need to make it dynamic according to image size
+
     positions: list[tuple[int, int]] = [
         (0, 15),
         (15, 0),
