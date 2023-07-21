@@ -26,9 +26,9 @@ def get_segments_from_image(image: NDArray) -> list[int]:
 
     image = cv2.resize(image, (71, 41))
     image = cv2.rotate(image, rotateCode=cv2.ROTATE_90_COUNTERCLOCKWISE)
-    plt.imshow(image, cmap="gray")
-    plt.title("image")
-    plt.show()
+    # plt.imshow(image, cmap="gray")
+    # plt.title("image")
+    # plt.show()
 
     positions: list[tuple[int, int]] = [
         (0, 15),
@@ -72,18 +72,3 @@ def identify_digit(segments):
             return digit
 
     return None
-
-
-# print(f"segmenting number 2 _-----------------------------------")
-# image_path = "2.jpg"
-# segments = get_segments_from_image(image_path)
-# print(segments)
-# digit = identify_digit(segments)
-# print("digit:", digit)
-#
-# print(f"segmenting number 5 _-----------------------------------")
-# image_path = "5.jpg"
-# segments = get_segments_from_image(image_path)
-# print(segments)
-# digit = identify_digit(segments)
-# print("digit:", digit)
