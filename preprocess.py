@@ -1,6 +1,7 @@
 import cv2
 from numpy.typing import NDArray
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def apply_greyscale(img: NDArray) -> NDArray:
@@ -27,22 +28,14 @@ def brighten_image(image):
 
 
 def apply_threshold(image):
-    _, thresholded = cv2.threshold(brighten_image(image), 110, 255, cv2.THRESH_BINARY)
+    _, thresholded = cv2.threshold(image, 110, 255, cv2.THRESH_BINARY)
     return thresholded
 
 
-def apply_filters(img: NDArray) -> NDArray:
+def apply_filters(img: NDArray, bright=True) -> NDArray:
     gray = apply_greyscale(img)
     enhanced = apply_contrast(gray)
+    if bright:  # the brigthen image is not good
+        enhanced = brighten_image(enhanced)
     image_with_filters = apply_threshold(enhanced)
-    # plt.imshow(image_after_trash, cmap="gray")
-    # plt.title("Thresholded Image")
-    # plt.show()
     return image_with_filters
-
-
-# plt.figure()
-# plt.subplot(1, 2, 1)
-# plt.imshow(image)
-# plt.title("Original Image")
-# plt.subplot(1, 2, 2)
